@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Painel WhatsApp v4 (HTML offline) – Scrapbook + Aprovações | Juliano Garbuggio</title>
+  <title>Jul.IA | Painel WhatsApp – Fluxos, Respostas e IA Jurídica</title>
   <style>
     :root{--bg:#0b0f19;--text:#e5e7eb;--muted:#9ca3af;--border:rgba(255,255,255,.10);--code:rgba(255,255,255,.06);}
     *{box-sizing:border-box}
@@ -64,6 +64,14 @@
     .itemActions{display:flex;gap:8px;flex-wrap:wrap}
     .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
     @media (max-width:980px){.grid{grid-template-columns:1fr}nav{position:relative;top:0;max-height:none}.grid2{grid-template-columns:1fr}}
+  
+    footer.siteFooter{position:fixed;left:0;right:0;bottom:0;z-index:9;
+      background:rgba(11,15,25,.92);backdrop-filter:blur(10px);
+      border-top:1px solid var(--border);}
+    footer .wrap{padding:10px 16px}
+    footer .footText{font-size:11px;color:var(--muted);line-height:1.35;white-space:pre-line}
+    body{padding-bottom:84px} /* room for footer */
+
   </style>
 </head>
 <body>
@@ -71,10 +79,9 @@
   <div class="wrap">
     <div class="topbar">
       <div class="title">
-        <h1>Painel WhatsApp v4 (HTML offline) – Scrapbook + Aprovações</h1>
+        <h1>Jul.IA | Painel WhatsApp – Fluxos, Respostas e IA Jurídica</h1>
         <div class="sub">
-          Você já consegue usar AGORA: templates + IA (se tiver backend) + modo privacidade + scrapbook interno + biblioteca de respostas aprovadas (salva no navegador).
-          <b>Quando a gente subir o app v4 (Railway + banco)</b>, essa biblioteca vira “memória real” do cérebro.
+          Ferramenta interna para atendimento no WhatsApp: templates + scrapbook + respostas aprovadas (memória). <b>Quando a gente subir o app v4 (Railway + banco)</b>, essa memória vira “memória real” do cérebro.
         </div>
       </div>
       <div class="controls">
@@ -208,6 +215,14 @@
                 </label>
               </div>
             </div>
+            
+            <div class="hint" style="margin-top:10px">
+              <b>Comandos do Scrapbook (pra virar “resposta rápida”):</b><br>
+              Use a <b>tag</b> como comando. Ex.: tag <span class="kbd">ferias</span> vira comando <span class="kbd">/ferias</span>.
+              Depois é só copiar e colar no WhatsApp (ou no app de Respostas Rápidas).
+              <div class="small" style="margin-top:6px">Dica: escolha tags curtas e sem acento (ex: <span class="kbd">docs</span>, <span class="kbd">horario</span>, <span class="kbd">ferias</span>).</div>
+            </div>
+
             <div id="scrapList" class="list"></div>
           </div>
         </div>
@@ -643,7 +658,7 @@ Se quiser retomar depois, fico à disposição 🙂</pre>
             <span class="small mono">${it.created_at}</span>
           </div>
           <div class="itemActions">
-            <button class="btn" data-scrap-copy="${idx}">Copiar</button>
+            <button class="btn" data-scrap-copy="${idx}">Copiar</button><button class="btn blue" data-scrap-cmd="${idx}">Copiar comando</button><button class="btn primary" data-scrap-full="${idx}">Copiar completo</button>
             <button class="btn warn" data-scrap-edit="${idx}">Editar</button>
             <button class="btn red" data-scrap-del="${idx}">Excluir</button>
           </div>
@@ -656,6 +671,25 @@ Se quiser retomar depois, fico à disposição 🙂</pre>
       const i = Number(b.getAttribute("data-scrap-copy"));
       copyText(items[i].text||"");
     }));
+    root.querySelectorAll("[data-scrap-cmd]").forEach(b=>b.addEventListener("click", ()=>{
+      const i = Number(b.getAttribute("data-scrap-cmd"));
+      const tag = (items[i].tag || "geral").toString().trim().toLowerCase()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\s+/g,"-").replace(/[^a-z0-9\-_/]/g,"");
+      copyText("/" + (tag || "geral"));
+    }));
+
+    root.querySelectorAll("[data-scrap-full]").forEach(b=>b.addEventListener("click", ()=>{
+      const i = Number(b.getAttribute("data-scrap-full"));
+      const base = (items[i].text || "").trim();
+      const {vant, rod} = getSelectedDefaults();
+      const vantTxt = getBlockText(vant).trim();
+      const rodTxt  = getBlockText(rod).trim();
+      let out = base;
+      if(vantTxt) out += "\n\n—\n" + vantTxt;
+      if(rodTxt)  out += "\n\n" + rodTxt;
+      copyText(out.trim());
+    }));
+
     root.querySelectorAll("[data-scrap-del]").forEach(b=>b.addEventListener("click", ()=>{
       const i = Number(b.getAttribute("data-scrap-del"));
       items.splice(i,1);
@@ -966,5 +1000,14 @@ Se quiser retomar depois, fico à disposição 🙂</pre>
   renderScrap();
   renderLib();
 </script>
+
+<footer class="siteFooter">
+  <div class="wrap">
+    <div class="footText">© 2025 Juliano Garbuggio – Advocacia & Consultoria — www.julianogarbuggio.adv.br — (11) 95675-9223
+Juliano Garbuggio Sociedade Individual de Advocacia — OAB/SP 54.923 | CNPJ 35.142.789/0001-08
+Powered by Jul.IA — Inteligência Jurídica Automatizada</div>
+  </div>
+</footer>
+
 </body>
 </html>
