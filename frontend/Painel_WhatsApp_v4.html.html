@@ -1,0 +1,970 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Painel WhatsApp v4 (HTML offline) – Scrapbook + Aprovações | Juliano Garbuggio</title>
+  <style>
+    :root{--bg:#0b0f19;--text:#e5e7eb;--muted:#9ca3af;--border:rgba(255,255,255,.10);--code:rgba(255,255,255,.06);}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:linear-gradient(180deg,#070a12,var(--bg));color:var(--text);}
+    header{position:sticky;top:0;z-index:10;background:rgba(11,15,25,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);}
+    .wrap{max-width:1320px;margin:0 auto;padding:14px 16px;}
+    .topbar{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+    .title{display:flex;flex-direction:column;gap:2px}
+    .title h1{font-size:16px;margin:0;letter-spacing:.2px}
+    .title .sub{font-size:12px;color:var(--muted);max-width:900px}
+    .controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;flex:1;justify-content:flex-end}
+    input[type="search"], textarea, select, input[type="text"]{
+      border:1px solid var(--border);background:rgba(255,255,255,.03);color:var(--text);
+      border-radius:12px;padding:10px 12px;outline:none;
+    }
+    input[type="search"]{width:min(360px,100%)}
+    input[type="text"]{width:min(260px,100%)}
+    textarea{width:100%;min-height:96px;resize:vertical}
+    select{padding:10px 12px}
+    .btn{border:1px solid var(--border);background:rgba(255,255,255,.05);color:var(--text);padding:10px 12px;border-radius:12px;cursor:pointer;transition:.15s ease;white-space:nowrap;}
+    .btn:hover{transform:translateY(-1px);background:rgba(255,255,255,.08)}
+    .btn.primary{border-color:rgba(34,197,94,.5);background:rgba(34,197,94,.14)}
+    .btn.blue{border-color:rgba(96,165,250,.55);background:rgba(96,165,250,.14)}
+    .btn.warn{border-color:rgba(245,158,11,.55);background:rgba(245,158,11,.14)}
+    .btn.red{border-color:rgba(239,68,68,.55);background:rgba(239,68,68,.14)}
+    .grid{display:grid;grid-template-columns:340px 1fr;gap:14px;align-items:start;max-width:1320px;margin:0 auto;padding:14px 16px 28px;}
+    nav{position:sticky;top:74px;background:rgba(17,24,39,.65);border:1px solid var(--border);border-radius:16px;padding:12px;overflow:auto;max-height:calc(100vh - 100px);}
+    nav .group{margin:8px 0 10px}
+    nav .groupTitle{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;margin:10px 6px 6px;}
+    nav a{display:block;padding:9px 10px;border-radius:12px;color:var(--text);text-decoration:none;border:1px solid transparent;}
+    nav a:hover{background:rgba(255,255,255,.05);border-color:var(--border)}
+    main{display:flex;flex-direction:column;gap:14px;}
+    .card{background:rgba(17,24,39,.65);border:1px solid var(--border);border-radius:16px;padding:14px;}
+    .card h2{margin:0 0 8px;font-size:14px}
+    .muted{color:var(--muted);font-size:12px}
+    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .pill{display:inline-flex;align-items:center;gap:8px;font-size:12px;padding:6px 10px;border-radius:999px;border:1px solid var(--border);background:rgba(255,255,255,.03);color:var(--text);}
+    .kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:var(--code);border:1px solid var(--border);padding:2px 6px;border-radius:8px;font-size:12px;color:#d1d5db;}
+    pre{margin:10px 0 0;white-space:pre-wrap;word-break:break-word;padding:12px;border-radius:14px;border:1px solid var(--border);background:rgba(0,0,0,.20);line-height:1.35;}
+    .editable{outline:1px dashed rgba(96,165,250,.35);background:rgba(96,165,250,.05);}
+    .okBox{background:rgba(34,197,94,.10);border:1px solid rgba(34,197,94,.35);padding:10px 12px;border-radius:14px;color:#dcfce7;font-size:12px;}
+    .dangerBox{background:rgba(239,68,68,.10);border:1px solid rgba(239,68,68,.35);padding:10px 12px;border-radius:14px;color:#fee2e2;font-size:12px;}
+    .hint{background:rgba(96,165,250,.10);border:1px solid rgba(96,165,250,.35);padding:10px 12px;border-radius:14px;color:#dbeafe;font-size:12px;}
+    .copyToast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:rgba(17,24,39,.95);border:1px solid var(--border);padding:10px 12px;border-radius:999px;font-size:12px;color:var(--text);opacity:0;pointer-events:none;transition:.2s ease;z-index:50;}
+    .copyToast.show{opacity:1;transform:translateX(-50%) translateY(-2px)}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .small{font-size:11px;color:var(--muted)}
+    label.switch{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text);padding:6px 10px;border-radius:999px;border:1px solid var(--border);background:rgba(255,255,255,.03);cursor:pointer;user-select:none;}
+    label.switch input{accent-color:#22c55e}
+    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+    .tab{padding:8px 10px;border-radius:999px;border:1px solid var(--border);background:rgba(255,255,255,.03);cursor:pointer;font-size:12px}
+    .tab.active{background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.45)}
+    .hidden{display:none !important}
+    .list{display:flex;flex-direction:column;gap:10px;margin-top:10px}
+    .item{border:1px solid var(--border);border-radius:14px;padding:10px;background:rgba(0,0,0,.18)}
+    .itemTop{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+    .tag{font-size:11px;color:#d1d5db;border:1px solid var(--border);padding:3px 8px;border-radius:999px;background:rgba(255,255,255,.03)}
+    .itemActions{display:flex;gap:8px;flex-wrap:wrap}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+    @media (max-width:980px){.grid{grid-template-columns:1fr}nav{position:relative;top:0;max-height:none}.grid2{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="title">
+        <h1>Painel WhatsApp v4 (HTML offline) – Scrapbook + Aprovações</h1>
+        <div class="sub">
+          Você já consegue usar AGORA: templates + IA (se tiver backend) + modo privacidade + scrapbook interno + biblioteca de respostas aprovadas (salva no navegador).
+          <b>Quando a gente subir o app v4 (Railway + banco)</b>, essa biblioteca vira “memória real” do cérebro.
+        </div>
+      </div>
+      <div class="controls">
+        <select id="profile">
+          <option value="AUTO">Perfil: Auto</option>
+          <option value="INSS">Perfil: INSS</option>
+          <option value="SERVIDOR">Perfil: Servidor</option>
+          <option value="CLT">Perfil: CLT</option>
+        </select>
+        <select id="defaultVant">
+          <option value="vant2">Vantagens padrão: /vant2</option>
+          <option value="vant1">Vantagens padrão: /vant1</option>
+          <option value="vant3">Vantagens padrão: /vant3</option>
+        </select>
+        <select id="defaultRod">
+          <option value="rodB">Rodapé padrão: /rodB</option>
+          <option value="rodA">Rodapé padrão: /rodA</option>
+          <option value="rodC">Rodapé padrão: /rodC</option>
+          <option value="rodD">Rodapé padrão: /rodD</option>
+        </select>
+        <input id="apiBase" type="text" value="http://127.0.0.1:8020" title="URL do backend (FastAPI). Se vazio: IA desliga." />
+        <input id="globalSearch" type="search" placeholder="Buscar (/m4), tema, palavra..." />
+        <button class="btn blue" id="btnToggleEdit">Modo edição: OFF</button>
+        <button class="btn warn" id="btnExport">Exportar HTML</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="grid">
+  <nav>
+    <div class="group">
+      <div class="groupTitle">Painel</div>
+      <a href="#hub"><span class="kbd">HUB</span> IA + Scrapbook + Aprovadas</a>
+    </div>
+    <div class="group">
+      <div class="groupTitle">Proposta / Procuração</div>
+      <a href="#proposta">/proposta</a>
+      <a href="#docsNec">/docsnec</a>
+      <a href="#form">/form</a>
+    </div>
+    <div class="group">
+      <div class="groupTitle">Fluxo</div>
+      <a href="#m1">/m1</a><a href="#m2inss">/m2inss</a><a href="#m2serv">/m2serv</a><a href="#m2clt">/m2clt</a>
+      <a href="#m3">/m3</a><a href="#m4">/m4</a><a href="#m5">/m5</a><a href="#m6">/m6</a><a href="#m7">/m7</a><a href="#m8">/m8</a>
+    </div>
+    <div class="group">
+      <div class="groupTitle">Blocos fixos</div>
+      <a href="#vant1">/vant1</a><a href="#vant2">/vant2</a><a href="#vant3">/vant3</a>
+      <a href="#rodA">/rodA</a><a href="#rodB">/rodB</a><a href="#rodC">/rodC</a><a href="#rodD">/rodD</a>
+    </div>
+    <div class="group">
+      <div class="groupTitle">Operação</div>
+      <a href="#docs">/docs</a><a href="#fechar">/fechar</a><a href="#naoviavel">/naoviavel</a>
+      <a href="#follow1">/follow1</a><a href="#follow2">/follow2</a><a href="#follow3">/follow3</a><a href="#encerrar">/encerrar</a>
+    </div>
+  </nav>
+
+  <main>
+    <section class="card" id="hub">
+      <h2>HUB – IA + Scrapbook + Respostas aprovadas</h2>
+      <div class="tabs">
+        <button class="tab active" data-tab="tab-ai">IA</button>
+        <button class="tab" data-tab="tab-scrap">Scrapbook</button>
+        <button class="tab" data-tab="tab-lib">Aprovadas</button>
+      </div>
+
+      <!-- IA -->
+      <div id="tab-ai" style="margin-top:12px">
+        <div class="grid2">
+          <div>
+            <div class="row" style="justify-content:space-between">
+              <div class="muted">Cole a mensagem do cliente (texto):</div>
+              <label class="switch" title="Mascara CPF/telefone/email etc antes de enviar (recomendado)">
+                <input type="checkbox" id="privacyMode" checked />
+                Modo privacidade
+              </label>
+            </div>
+            <textarea id="aiClientMsg" placeholder="Cole aqui a pergunta do cliente..."></textarea>
+            <div class="row" style="margin-top:10px">
+              <button class="btn primary" id="btnAISuggest">IA sugerir</button>
+              <button class="btn" id="btnAIClear">Limpar</button>
+              <button class="btn" id="btnPreviewRedaction">Ver redigido</button>
+            </div>
+            <div class="small" style="margin-top:8px">
+              <span class="kbd">Dica prática</span>: se a IA estiver OFF, preenche a URL do backend ali em cima (apiBase). Se ainda não tiver backend, dá pra usar só os templates por enquanto.
+            </div>
+            <div id="redactionPreview" style="margin-top:10px"></div>
+          </div>
+          <div>
+            <div class="hint">
+              <b>Como isso vira o “cérebro” do app v4?</b><br>
+              Tudo que você aprovar aqui entra na “biblioteca de exemplos bons”.
+              No app v4 (Railway + banco), a IA vai <b>buscar exemplos aprovados</b> e o seu scrapbook antes de responder.
+              Aí sim fica cada vez mais no seu estilo, sem virar robô repetido.
+            </div>
+            <div id="aiResult" style="margin-top:10px"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scrapbook -->
+      <div id="tab-scrap" class="hidden" style="margin-top:12px">
+        <div class="grid2">
+          <div>
+            <div class="muted">Cole aqui conteúdos do escritório (scripts, avisos, horários, férias, links, políticas, etc.).</div>
+            <textarea id="scrapText" placeholder="Ex: Aviso de férias: estaremos em recesso de ... a ... / Horário de atendimento / Política de envio de documentos / Link do formulário..."></textarea>
+            <div class="row" style="margin-top:10px">
+              <input id="scrapTag" type="text" placeholder="Tag (ex: ferias, horario, documentos)">
+              <button class="btn primary" id="btnScrapSave">Salvar no scrapbook</button>
+              <button class="btn" id="btnScrapClear">Limpar</button>
+            </div>
+
+            <div class="hint" style="margin-top:10px">
+              <b>Atalho rápido:</b>
+              <div class="row" style="margin-top:8px">
+                <button class="btn" data-scrap-preset="ferias">Inserir modelo “Férias”</button>
+                <button class="btn" data-scrap-preset="horario">Inserir modelo “Horário”</button>
+                <button class="btn" data-scrap-preset="doc">Inserir modelo “Envio de documentos”</button>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="row" style="justify-content:space-between">
+              <div class="muted">Itens salvos (fica no seu navegador):</div>
+              <div class="row">
+                <button class="btn" id="btnScrapExport">Exportar JSON</button>
+                <label class="btn" style="display:inline-flex;align-items:center;gap:8px">
+                  Importar JSON
+                  <input id="scrapImport" type="file" accept="application/json" style="display:none">
+                </label>
+              </div>
+            </div>
+            <div id="scrapList" class="list"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Aprovadas -->
+      <div id="tab-lib" class="hidden" style="margin-top:12px">
+        <div class="grid2">
+          <div>
+            <div class="muted">Filtro rápido (por palavra):</div>
+            <input id="libSearch" type="search" placeholder="Ex: custas, contrato, rmc, 10 anos..." style="width:100%">
+            <div class="hint" style="margin-top:10px">
+              <b>Como você usa isso no dia a dia?</b><br>
+              Quando um caso parecido aparecer, você pesquisa aqui, copia uma resposta aprovada, e manda.
+              No app v4, isso vira “memória” de verdade: a IA puxa automaticamente respostas parecidas aprovadas.
+            </div>
+            <div class="row" style="margin-top:10px">
+              <button class="btn red" id="btnLibWipe">Apagar biblioteca (cuidado)</button>
+              <button class="btn" id="btnLibExport">Exportar JSON</button>
+              <label class="btn" style="display:inline-flex;align-items:center;gap:8px">
+                Importar JSON
+                <input id="libImport" type="file" accept="application/json" style="display:none">
+              </label>
+            </div>
+          </div>
+          <div>
+            <div class="muted">Respostas aprovadas:</div>
+            <div id="libList" class="list"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== TEXTOS-BASE (EDITÁVEIS) ========== -->
+    <section class="card" id="proposta" data-search="/proposta proposta revisão empréstimo contratos 10 anos procon ação honorários">
+      <div class="row"><span class="pill"><span class="kbd">/proposta</span></span><button class="btn" data-copy="proposta">Copiar</button><button class="btn primary" data-copyfull="proposta">Copiar completo</button></div>
+      <pre data-block="proposta" data-title="/proposta">Olá, tudo bem? ✅
+
+*TODOS os contratos de financiamento* (consignados ou pessoais) *feitos nos últimos 10 anos* podem ser *REVISADOS*.
+Vou te passar algumas informações sobre como funciona.
+
+✅ *Quais contratos eu faço revisão?*
+• Empréstimos consignados e financiamentos bancários pessoais/empresariais (exceto veículos e imobiliários).
+• Contratos dos últimos 10 anos, inclusive os já pagos, podem ser revisados judicialmente.
+• Se houver cobrança indevida, pode haver devolução simples ou em dobro, conforme o caso.
+
+✅ *Por que dá pra questionar?*
+• Falta de informação clara (juros, parcelas, condições)
+• Assinatura inválida / contrato incompleto
+• Contratação por telefone/caixa rápido sem explicação adequada
+• Contrato digital sem requisitos legais (conforme o caso)
+
+✅ *O que eu faço por você?*
+1) Reclamações no Procon/consumidor.gov.br
+2) Análise de extratos/holerites e contratos (os que tiver e os que o banco enviar)
+3) Se não houver acordo, ação judicial
+
+✅ *Custas e risco*
+• Em muitos casos: Justiça Gratuita.
+• Em outros: Juizado Especial, normalmente sem custas iniciais.
+• Se não houver êxito, em regra você não paga honorários/custas (conforme o rito e o caso).
+
+✅ *Honorários por êxito*
+• 35% do que deixar de pagar (se cancelar contrato)
+• 40% do que receber de volta
+• 45% de indenização/multas (quando cabível)
+
+Qualquer dúvida, só me chamar!
+*Juliano Garbuggio* | ADVOGADO</pre>
+    </section>
+
+    <section class="card" id="docsNec" data-search="/docsnec documentos necessários meu inss holerite contracheque consumidor.gov gov.br">
+      <div class="row"><span class="pill"><span class="kbd">/docsnec</span></span><button class="btn" data-copy="docsnec">Copiar</button><button class="btn primary" data-copyfull="docsnec">Copiar completo</button></div>
+      <pre data-block="docsnec" data-title="/docsnec">📑 *Documentos Necessários*
+
+✅ *INSS (aposentados/pensionistas):*
+• Extrato COMPLETO e ATUAL (ativos e encerrados)
+• Comprovantes de recebimento (idealmente até 10 anos)
+➡️ Baixa no Meu INSS
+
+✅ *Consignados municipais/estaduais/privados:*
+• Contra-cheques (idealmente até 10 anos)
+
+✅ *Financiamentos bancários (exceto veículos e imobiliários):*
+• Contratos (se tiver)
+• Extratos da conta (período disponível)
+• Se não tiver: banco/agência/conta
+
+✅ *Além disso:*
+• Conta do consumidor.gov.br (GOV.BR) para reclamações
+• RG/CPF (foto nítida) e comprovante de residência atual</pre>
+    </section>
+
+    <section class="card" id="form" data-search="/form formulário procuração contrato digital assinatura online">
+      <div class="row"><span class="pill"><span class="kbd">/form</span></span><button class="btn" data-copy="form">Copiar</button><button class="btn primary" data-copyfull="form">Copiar completo</button></div>
+      <pre data-block="form" data-title="/form">📝 *Para iniciar os trabalhos*, preencha a *OPÇÃO 1* do formulário:
+
+https://formulario.julianogarbuggio.adv.br/
+
+Depois disso eu te envio a *procuração* e o *contrato digital* para assinatura online, sem sair de casa, com segurança.</pre>
+    </section>
+
+    <section class="card" id="m1" data-search="/m1 análise gratuita gratuito rmc rcc refinanciamento assinatura juros">
+      <div class="row"><span class="pill"><span class="kbd">/m1</span></span><button class="btn" data-copy="m1">Copiar</button><button class="btn primary" data-copyfull="m1">Copiar completo</button></div>
+      <pre data-block="m1" data-title="/m1">🧐 <b>Você sabia que a análise do seu contrato é gratuita?</b>
+
+Muita gente tem desconto de consignado e não sabe se está correto.
+A análise é 100% gratuita, sem compromisso.
+Verificamos RMC/RCC, refinanciamento irregular, assinatura inválida e falta de informação sobre juros.</pre>
+    </section>
+
+    <section class="card" id="m2inss" data-search="/m2inss inss aposentado pensionista rmc rcc cartão desconto eterno">
+      <div class="row"><span class="pill"><span class="kbd">/m2inss</span></span><button class="btn" data-copy="m2inss">Copiar</button><button class="btn primary" data-copyfull="m2inss">Copiar completo</button></div>
+      <pre data-block="m2inss" data-title="/m2inss">👵 <b>INSS: atenção ao cartão consignado (RMC/RCC)</b>
+
+É comum o banco liberar como “empréstimo”, mas na prática virar cartão (RMC/RCC) sem explicar.
+O desconto mensal pode não quitar a dívida e virar “desconto eterno”.</pre>
+    </section>
+
+    <section class="card" id="m2serv" data-search="/m2serv servidor público refinanciamento juros contrato incompleto">
+      <div class="row"><span class="pill"><span class="kbd">/m2serv</span></span><button class="btn" data-copy="m2serv">Copiar</button><button class="btn primary" data-copyfull="m2serv">Copiar completo</button></div>
+      <pre data-block="m2serv" data-title="/m2serv">🏛️ <b>Servidor: refinanciamentos e contratos incompletos</b>
+
+Refinanciamento não solicitado, juros mal explicados e contrato incompleto acontecem bastante.
+Mesmo contratos quitados podem ter irregularidades e permitir revisão.</pre>
+    </section>
+
+    <section class="card" id="m2clt" data-search="/m2clt clt carteira assinada juros falta de informação empréstimo">
+      <div class="row"><span class="pill"><span class="kbd">/m2clt</span></span><button class="btn" data-copy="m2clt">Copiar</button><button class="btn primary" data-copyfull="m2clt">Copiar completo</button></div>
+      <pre data-block="m2clt" data-title="/m2clt">👔 <b>CLT: mesmo quando você pediu, dá pra revisar</b>
+
+Se houve falta de informação, juros não explicados ou irregularidade, o contrato pode ser revisto, conforme o caso.</pre>
+    </section>
+
+    <section class="card" id="m3" data-search="/m3 custas justiça gratuita juizado jec custo processo">
+      <div class="row"><span class="pill"><span class="kbd">/m3</span></span><button class="btn" data-copy="m3">Copiar</button><button class="btn primary" data-copyfull="m3">Copiar completo</button></div>
+      <pre data-block="m3" data-title="/m3">💰 <b>Custas: dá pra entrar sem gastar pra começar</b>
+
+Na maioria dos casos, é possível Justiça Gratuita.
+Quando não se aplica, dá pra ir pelo Juizado Especial, normalmente sem custas iniciais.</pre>
+    </section>
+
+    <section class="card" id="m4" data-search="/m4 10 anos dez anos contrato antigo sem contrato banco pedir documento">
+      <div class="row"><span class="pill"><span class="kbd">/m4</span></span><button class="btn" data-copy="m4">Copiar</button><button class="btn primary" data-copyfull="m4">Copiar completo</button></div>
+      <pre data-block="m4" data-title="/m4">📄 <b>Contratos dos últimos 10 anos podem ser revisados</b>
+
+Mesmo contrato antigo/quitado pode ter cobrança indevida.
+E se você não tiver contrato, tudo bem: dá pra pedir pro banco e, se não apresentar ou houver irregularidade, dá pra discutir a cobrança como indevida.</pre>
+    </section>
+
+    <section class="card" id="m5" data-search="/m5 só paga se ganhar honorários êxito risco">
+      <div class="row"><span class="pill"><span class="kbd">/m5</span></span><button class="btn" data-copy="m5">Copiar</button><button class="btn primary" data-copyfull="m5">Copiar completo</button></div>
+      <pre data-block="m5" data-title="/m5">⚖️ <b>Honorários: só em caso de êxito</b>
+
+Você não paga nada antecipado.
+Os honorários são devidos só em caso de êxito (modelo do escritório).</pre>
+    </section>
+
+    <section class="card" id="m6" data-search="/m6 eu pedi solicitei usei o dinheiro revisão anular">
+      <div class="row"><span class="pill"><span class="kbd">/m6</span></span><button class="btn" data-copy="m6">Copiar</button><button class="btn primary" data-copyfull="m6">Copiar completo</button></div>
+      <pre data-block="m6" data-title="/m6">❗ <b>Mesmo que você tenha pedido o empréstimo, dá pra revisar</b>
+
+O banco tem obrigação de explicar tudo e formalizar corretamente.
+Se houver irregularidade/assinatura inválida/falta de informação, o contrato pode ser revisto ou anulado, conforme o caso.</pre>
+    </section>
+
+    <section class="card" id="m7" data-search="/m7 devolução em dobro danos morais cancelar contrato suspender descontos">
+      <div class="row"><span class="pill"><span class="kbd">/m7</span></span><button class="btn" data-copy="m7">Copiar</button><button class="btn primary" data-copyfull="m7">Copiar completo</button></div>
+      <pre data-block="m7" data-title="/m7">💸 <b>O que pode acontecer quando é indevido?</b>
+
+Pode haver devolução (simples ou em dobro), conforme o caso.
+Também pode haver danos morais e cancelamento do contrato (se estiver ativo), conforme análise.</pre>
+    </section>
+
+    <section class="card" id="m8" data-search="/m8 autoridade êxito viável análise criteriosa">
+      <div class="row"><span class="pill"><span class="kbd">/m8</span></span><button class="btn" data-copy="m8">Copiar</button><button class="btn primary" data-copyfull="m8">Copiar completo</button></div>
+      <pre data-block="m8" data-title="/m8">✅ <b>Análise criteriosa</b>
+
+O escritório só segue com casos juridicamente viáveis, o que costuma elevar a taxa de êxito (sem promessa).
+Se quiser, me mande as infos básicas que eu analiso.</pre>
+    </section>
+
+    <section class="card" id="vant1" data-search="/vant1 vantagens suspender descontos cancelar contrato devolução em dobro danos morais">
+      <div class="row"><span class="pill"><span class="kbd">/vant1</span></span><button class="btn" data-copy="vant1">Copiar</button></div>
+      <pre data-block="vant1" data-title="/vant1">✅ <b>Vantagens possíveis da ação</b>
+✔️ Parar descontos (se ativo) e pedir cancelamento do contrato irregular  
+✔️ Devolução do indevido (simples ou em dobro, conforme o caso)  
+✔️ Possível dano moral, quando cabível  
+📌 Mesmo contrato encerrado pode gerar devolução do indevido.</pre>
+    </section>
+
+    <section class="card" id="vant2" data-search="/vant2 vantagens parar descontos cancelar contrato devolução em dobro danos morais">
+      <div class="row"><span class="pill"><span class="kbd">/vant2</span></span><button class="btn" data-copy="vant2">Copiar</button></div>
+      <pre data-block="vant2" data-title="/vant2">💡 <b>O que a ação pode gerar (conforme o caso)?</b>
+✔️ Suspender descontos (se estiver pagando)  
+✔️ Cancelar contrato irregular  
+✔️ Devolver valores pagos indevidamente (às vezes em dobro)  
+✔️ Possível dano moral, quando cabível  
+📌 Contratos encerrados também podem ser revisados.</pre>
+    </section>
+
+    <section class="card" id="vant3" data-search="/vant3 vantagens ativo parar de pagar encerrado recuperar valores danos morais">
+      <div class="row"><span class="pill"><span class="kbd">/vant3</span></span><button class="btn" data-copy="vant3">Copiar</button></div>
+      <pre data-block="vant3" data-title="/vant3">📌 <b>Resumo das vantagens</b>
+✔️ Ativo: tentar parar de pagar/suspender descontos  
+✔️ Encerrado: buscar devolução do indevido  
+✔️ Devolução simples ou em dobro, conforme o caso + possível dano moral</pre>
+    </section>
+
+    <section class="card" id="rodA" data-search="/rodA rodapé juliano garbuggio oab atendimento brasil">
+      <div class="row"><span class="pill"><span class="kbd">/rodA</span></span><button class="btn" data-copy="rodA">Copiar</button></div>
+      <pre data-block="rodA" data-title="/rodA">—  
+<b>Juliano Garbuggio</b>  
+Advocacia e Consultoria  
+OAB/PR • OAB/SP • OAB/MG  
+📍 Atendimento digital em todo o Brasil</pre>
+    </section>
+
+    <section class="card" id="rodB" data-search="/rodB rodapé juliano garbuggio advogado oab atendimento nacional">
+      <div class="row"><span class="pill"><span class="kbd">/rodB</span></span><button class="btn" data-copy="rodB">Copiar</button></div>
+      <pre data-block="rodB" data-title="/rodB">—  
+<b>Juliano Garbugggio</b>  
+Advogado  
+OAB/PR • OAB/SP • OAB/MG  
+Especialista em contratos bancários  
+Atendimento nacional</pre>
+    </section>
+
+    <section class="card" id="rodC" data-search="/rodC rodapé juliano garbuggio advocacia digital">
+      <div class="row"><span class="pill"><span class="kbd">/rodC</span></span><button class="btn" data-copy="rodC">Copiar</button></div>
+      <pre data-block="rodC" data-title="/rodC">—  
+<b>Juliano Garbuggio</b>  
+Advocacia Digital  
+OAB/PR • OAB/SP • OAB/MG  
+Atendemos clientes em todo o Brasil</pre>
+    </section>
+
+    <section class="card" id="rodD" data-search="/rodD rodapé juliano garbuggio contratos bancários consultoria online">
+      <div class="row"><span class="pill"><span class="kbd">/rodD</span></span><button class="btn" data-copy="rodD">Copiar</button></div>
+      <pre data-block="rodD" data-title="/rodD">—  
+<b>Juliano Garbuggio</b>  
+Advogado – Contratos Bancários  
+OAB/PR • OAB/SP • OAB/MG  
+Consultoria jurídica online</pre>
+    </section>
+
+    <section class="card" id="docs" data-search="/docs pedir documentos extrato holerite contrato">
+      <div class="row"><span class="pill"><span class="kbd">/docs</span></span><button class="btn" data-copy="docs">Copiar</button><button class="btn primary" data-copyfull="docs">Copiar completo</button></div>
+      <pre data-block="docs" data-title="/docs">Perfeito 🙂
+Pra seguir com a análise, me envie:
+📄 extrato do benefício (ou holerite/contra-cheque)
+📄 contratos, se tiver (se não tiver, tudo bem)
+A análise é gratuita.</pre>
+    </section>
+
+    <section class="card" id="fechar" data-search="/fechar fechamento viável ação suspender descontos cancelar contrato devolver em dobro danos morais">
+      <div class="row"><span class="pill"><span class="kbd">/fechar</span></span><button class="btn" data-copy="fechar">Copiar</button><button class="btn primary" data-copyfull="fechar">Copiar completo</button></div>
+      <pre data-block="fechar" data-title="/fechar">Analisei seu caso com cuidado e vi indícios de irregularidade.
+
+A ação pode:
+✔️ suspender descontos (se ativo) e pedir cancelamento do contrato irregular  
+✔️ pedir devolução do indevido (simples ou em dobro, conforme o caso)  
+✔️ possível dano moral, quando cabível  
+
+A análise foi gratuita, sem pagamento antecipado. Se você quiser, te explico os próximos passos.</pre>
+    </section>
+
+    <section class="card" id="naoviavel" data-search="/naoviavel não viável sem irregularidade">
+      <div class="row"><span class="pill"><span class="kbd">/naoviavel</span></span><button class="btn" data-copy="naoviavel">Copiar</button><button class="btn primary" data-copyfull="naoviavel">Copiar completo</button></div>
+      <pre data-block="naoviavel" data-title="/naoviavel">Analisei com atenção e, por agora, não vi base segura pra ação.
+
+Prefiro ser transparente pra não criar expectativa.
+Se aparecerem novos descontos ou você conseguir mais documentos, reavaliamos.</pre>
+    </section>
+
+    <section class="card" id="follow1" data-search="/follow1 follow 48h retorno">
+      <div class="row"><span class="pill"><span class="kbd">/follow1</span></span><button class="btn" data-copy="follow1">Copiar</button><button class="btn primary" data-copyfull="follow1">Copiar completo</button></div>
+      <pre data-block="follow1" data-title="/follow1">Oi! Só passando pra saber se conseguiu ver com calma o que te enviei.
+Se tiver dúvida, me chama 🙂</pre>
+    </section>
+
+    <section class="card" id="follow2" data-search="/follow2 follow 5 dias viável reforço">
+      <div class="row"><span class="pill"><span class="kbd">/follow2</span></span><button class="btn" data-copy="follow2">Copiar</button><button class="btn primary" data-copyfull="follow2">Copiar completo</button></div>
+      <pre data-block="follow2" data-title="/follow2">Só reforçando: em muitos casos dá pra pedir suspensão dos descontos e devolução do indevido (conforme o caso).
+Se quiser, seguimos 🙂</pre>
+    </section>
+
+    <section class="card" id="follow3" data-search="/follow3 follow 10 dias descontos continuam suspensão">
+      <div class="row"><span class="pill"><span class="kbd">/follow3</span></span><button class="btn" data-copy="follow3">Copiar</button><button class="btn primary" data-copyfull="follow3">Copiar completo</button></div>
+      <pre data-block="follow3" data-title="/follow3">Enquanto o contrato estiver ativo, os descontos continuam.
+Com a ação, dá pra pedir a suspensão dessas cobranças (conforme o caso).
+Se fizer sentido pra você, me avisa 🙂</pre>
+    </section>
+
+    <section class="card" id="encerrar" data-search="/encerrar encerrar elegante">
+      <div class="row"><span class="pill"><span class="kbd">/encerrar</span></span><button class="btn" data-copy="encerrar">Copiar</button><button class="btn primary" data-copyfull="encerrar">Copiar completo</button></div>
+      <pre data-block="encerrar" data-title="/encerrar">Encerrando por aqui pra não te incomodar.
+Se quiser retomar depois, fico à disposição 🙂</pre>
+    </section>
+
+  </main>
+</div>
+
+<div class="copyToast" id="toast">Copiado ✅</div>
+
+<script>
+  // ========= storage keys =========
+  const KEY_SCRAP = "JG_SCRAPBOOK_V4";
+  const KEY_LIB   = "JG_APPROVED_V4";
+
+  // ========= helpers =========
+  const toast = document.getElementById("toast");
+  function showToast(msg="Copiado ✅"){ toast.textContent = msg; toast.classList.add("show"); setTimeout(()=>toast.classList.remove("show"), 1400); }
+  async function copyText(text){
+    try{ await navigator.clipboard.writeText(text); showToast(); }
+    catch(e){ const ta=document.createElement("textarea"); ta.value=text; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); ta.remove(); showToast("Copiado (fallback) ✅");}
+  }
+  function normalize(s){ return (s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\s+/g," ").trim(); }
+  function nowISO(){ return new Date().toISOString(); }
+  function loadJSON(key, fallback){ try{ return JSON.parse(localStorage.getItem(key) || ""); }catch(e){ return fallback; } }
+  function saveJSON(key, value){ localStorage.setItem(key, JSON.stringify(value)); }
+
+  function getBlockText(blockId){ const el=document.querySelector(`pre[data-block="${blockId}"]`); return el? el.innerText : ""; }
+  function getSelectedDefaults(){ return { vant: document.getElementById("defaultVant").value, rod: document.getElementById("defaultRod").value }; }
+  function buildFullMessage(blockId){
+    const base=getBlockText(blockId).trim();
+    const {vant,rod}=getSelectedDefaults();
+    const vantTxt=getBlockText(vant).trim();
+    const rodTxt=getBlockText(rod).trim();
+    let out=base;
+    if(vantTxt) out += "\n\n—\n" + vantTxt;
+    if(rodTxt) out += "\n\n" + rodTxt;
+    return out.trim();
+  }
+
+  // ========= tabs =========
+  const tabs = document.querySelectorAll(".tab");
+  function setTab(id){
+    tabs.forEach(t=>t.classList.toggle("active", t.getAttribute("data-tab") === id));
+    ["tab-ai","tab-scrap","tab-lib"].forEach(x=>{
+      document.getElementById(x).classList.toggle("hidden", x !== id);
+    });
+  }
+  tabs.forEach(t=>t.addEventListener("click", ()=>setTab(t.getAttribute("data-tab"))));
+
+  // ========= copy buttons =========
+  document.querySelectorAll("[data-copy]").forEach(btn=> btn.addEventListener("click", ()=> copyText(getBlockText(btn.getAttribute("data-copy"))) ));
+  document.querySelectorAll("[data-copyfull]").forEach(btn=> btn.addEventListener("click", ()=> copyText(buildFullMessage(btn.getAttribute("data-copyfull"))) ));
+
+  // ========= search =========
+  const globalSearch=document.getElementById("globalSearch");
+  const cards=Array.from(document.querySelectorAll("main .card")).filter(c=>c.id!=="hub");
+  function applySearch(){
+    const q=normalize(globalSearch.value);
+    cards.forEach(card=>{
+      const hay=normalize(card.getAttribute("data-search")||"") + " " + normalize(card.innerText);
+      card.style.display = (!q || hay.includes(q)) ? "" : "none";
+    });
+  }
+  globalSearch.addEventListener("input", applySearch);
+
+  // ========= edit mode =========
+  let editOn=false;
+  const btnToggleEdit=document.getElementById("btnToggleEdit");
+  function setEditMode(on){
+    editOn=on;
+    btnToggleEdit.textContent="Modo edição: " + (on?"ON":"OFF");
+    btnToggleEdit.classList.toggle("primary", on);
+    document.querySelectorAll("pre[data-block]").forEach(pre=>{ pre.contentEditable=on?"true":"false"; pre.classList.toggle("editable", on); pre.spellcheck=false; });
+    showToast(on ? "Edição ativada ✍️" : "Edição desativada ✅");
+  }
+  btnToggleEdit.addEventListener("click", ()=> setEditMode(!editOn));
+
+  // ========= export html =========
+  function exportHTML(){
+    setEditMode(false);
+    const doctype="<!doctype html>";
+    const htmlEl=document.documentElement.cloneNode(true);
+    const ta=htmlEl.querySelector("#aiClientMsg"); if(ta) ta.value="";
+    const full=doctype + "\n" + htmlEl.outerHTML;
+    const blob=new Blob([full], {type:"text/html;charset=utf-8"});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a");
+    const ts=new Date().toISOString().slice(0,19).replace(/[:T]/g,"-");
+    a.href=url; a.download=`Painel_WhatsApp_v4_HTML_OFFLINE_${ts}.html`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+    showToast("HTML exportado ✅");
+  }
+  document.getElementById("btnExport").addEventListener("click", exportHTML);
+
+  // ========= privacy redaction =========
+  function redactText(input){
+    let s = input || "";
+    s = s.replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, "[EMAIL]");
+    s = s.replace(/\b\d{3}\.?\d{3}\.?\d{3}-?\d{2}\b/g, "[CPF]");
+    s = s.replace(/\b(?:\+?55\s?)?(?:\(?\d{2}\)?\s?)?(?:9?\d{4})[-\s]?\d{4}\b/g, "[TELEFONE]");
+    s = s.replace(/\b[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\b/gi, "[PIX-EVP]");
+    s = s.replace(/\b\d{8,}\b/g, "[NUMERO]");
+    s = s.replace(/\b(rua|avenida|av\.?|travessa|estrada)\b[^,\n]{0,60}/gi, "[ENDERECO]");
+    return s;
+  }
+  document.getElementById("btnPreviewRedaction").addEventListener("click", ()=>{
+    const raw=document.getElementById("aiClientMsg").value;
+    const red=redactText(raw);
+    document.getElementById("redactionPreview").innerHTML = `<div class="hint"><b>Prévia (o que vai pra IA):</b><pre style="margin-top:8px">${red.replace(/</g,"&lt;").replace(/>/g,"&gt;")}</pre></div>`;
+  });
+
+  // ========= templates collector =========
+  function collectTemplates(){
+    return Array.from(document.querySelectorAll("pre[data-block]")).map(pre=>{
+      const block=pre.getAttribute("data-block");
+      const title=pre.getAttribute("data-title")||block;
+      const text=pre.innerText||"";
+      return { id:block, title, text };
+    });
+  }
+  function currentProfile(){ return document.getElementById("profile").value; }
+
+  // ========= scrapbook =========
+  function renderScrap(){
+    const items = loadJSON(KEY_SCRAP, []);
+    const root = document.getElementById("scrapList");
+    if(!items.length){
+      root.innerHTML = `<div class="hint">Sem itens ainda. Cole um texto (horário, férias, políticas) e clique em <b>Salvar no scrapbook</b>.</div>`;
+      return;
+    }
+    root.innerHTML = items.map((it, idx)=>`
+      <div class="item">
+        <div class="itemTop">
+          <div class="row">
+            <span class="tag">${(it.tag||"sem-tag")}</span>
+            <span class="small mono">${it.created_at}</span>
+          </div>
+          <div class="itemActions">
+            <button class="btn" data-scrap-copy="${idx}">Copiar</button>
+            <button class="btn warn" data-scrap-edit="${idx}">Editar</button>
+            <button class="btn red" data-scrap-del="${idx}">Excluir</button>
+          </div>
+        </div>
+        <pre style="margin-top:10px">${(it.text||"").replace(/</g,"&lt;").replace(/>/g,"&gt;")}</pre>
+      </div>
+    `).join("");
+
+    root.querySelectorAll("[data-scrap-copy]").forEach(b=>b.addEventListener("click", ()=>{
+      const i = Number(b.getAttribute("data-scrap-copy"));
+      copyText(items[i].text||"");
+    }));
+    root.querySelectorAll("[data-scrap-del]").forEach(b=>b.addEventListener("click", ()=>{
+      const i = Number(b.getAttribute("data-scrap-del"));
+      items.splice(i,1);
+      saveJSON(KEY_SCRAP, items);
+      renderScrap();
+      showToast("Excluído ✅");
+    }));
+    root.querySelectorAll("[data-scrap-edit]").forEach(b=>b.addEventListener("click", ()=>{
+      const i = Number(b.getAttribute("data-scrap-edit"));
+      document.getElementById("scrapText").value = items[i].text || "";
+      document.getElementById("scrapTag").value = items[i].tag || "";
+      items.splice(i,1);
+      saveJSON(KEY_SCRAP, items);
+      renderScrap();
+      showToast("Editando… ✍️");
+    }));
+  }
+
+  document.getElementById("btnScrapSave").addEventListener("click", ()=>{
+    const text = document.getElementById("scrapText").value.trim();
+    const tag  = document.getElementById("scrapTag").value.trim() || "geral";
+    if(!text){ showToast("Cole um texto 🙂"); return; }
+    const items = loadJSON(KEY_SCRAP, []);
+    items.unshift({ tag, text, created_at: nowISO() });
+    saveJSON(KEY_SCRAP, items);
+    document.getElementById("scrapText").value = "";
+    document.getElementById("scrapTag").value = "";
+    renderScrap();
+    showToast("Salvo ✅");
+  });
+
+  document.getElementById("btnScrapClear").addEventListener("click", ()=>{
+    document.getElementById("scrapText").value = "";
+    document.getElementById("scrapTag").value = "";
+    showToast("Limpo ✅");
+  });
+
+  // presets
+  const presets = {
+    ferias: `🏖️ *Aviso rápido*\n\nEstaremos em recesso/férias de __/__/____ a __/__/____.\nDurante esse período, as respostas podem demorar um pouco.\nSe for urgente, deixe sua mensagem aqui que eu retorno assim que possível 🙂`,
+    horario: `🕒 *Horário de atendimento*\n\nSeg–Sex: 09h às 18h\nAtendimento 100% digital (Brasil todo).\nSe você mandar mensagem fora do horário, eu respondo assim que voltar 🙂`,
+    doc: `📎 *Envio de documentos*\n\nPra manter segurança e organização, peço que você envie:\n• fotos nítidas (sem cortes) ou PDFs\n• se tiver dificuldade, me avise que eu te oriento\n\nEvite mandar senhas por mensagem. Se precisar de acesso (ex: Meu INSS), combinamos um jeito seguro.`
+  };
+  document.querySelectorAll("[data-scrap-preset]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const k = btn.getAttribute("data-scrap-preset");
+      document.getElementById("scrapText").value = presets[k] || "";
+      document.getElementById("scrapTag").value  = k;
+      showToast("Modelo inserido ✅");
+    });
+  });
+
+  // export/import scrapbook
+  document.getElementById("btnScrapExport").addEventListener("click", ()=>{
+    const items = loadJSON(KEY_SCRAP, []);
+    const blob = new Blob([JSON.stringify(items, null, 2)], {type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "scrapbook_v4.json";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 1000);
+  });
+  document.getElementById("scrapImport").addEventListener("change", async (e)=>{
+    const f = e.target.files && e.target.files[0];
+    if(!f) return;
+    const txt = await f.text();
+    try{
+      const items = JSON.parse(txt);
+      if(!Array.isArray(items)) throw new Error("JSON inválido (esperava array)");
+      saveJSON(KEY_SCRAP, items);
+      renderScrap();
+      showToast("Scrapbook importado ✅");
+    }catch(err){
+      alert("Falha ao importar: " + err);
+    }finally{
+      e.target.value = "";
+    }
+  });
+
+  // ========= approved library =========
+  function renderLib(){
+    const items = loadJSON(KEY_LIB, []);
+    const q = normalize(document.getElementById("libSearch").value || "");
+    const root = document.getElementById("libList");
+    const filtered = q ? items.filter(it=> normalize(it.client_message).includes(q) || normalize(it.final_reply).includes(q) ) : items;
+
+    if(!filtered.length){
+      root.innerHTML = `<div class="hint">Nada por aqui ainda. Quando você usar a IA e clicar em <b>Aprovar</b> (ou <b>Editar e aprovar</b>), aparece aqui.</div>`;
+      return;
+    }
+
+    root.innerHTML = filtered.map((it, idx)=>`
+      <div class="item">
+        <div class="itemTop">
+          <div class="row">
+            <span class="tag">${(it.profile||"AUTO")}</span>
+            <span class="tag">cmd: ${(it.command||"—")}</span>
+            <span class="small mono">${it.created_at}</span>
+          </div>
+          <div class="itemActions">
+            <button class="btn" data-lib-copy="${it.id}">Copiar</button>
+            <button class="btn warn" data-lib-edit="${it.id}">Editar</button>
+            <button class="btn red" data-lib-del="${it.id}">Excluir</button>
+          </div>
+        </div>
+        <div class="small"><b>Pergunta:</b> ${(it.client_message||"").replace(/</g,"&lt;").replace(/>/g,"&gt;")}</div>
+        <pre style="margin-top:10px">${(it.final_reply||"").replace(/</g,"&lt;").replace(/>/g,"&gt;")}</pre>
+      </div>
+    `).join("");
+
+    root.querySelectorAll("[data-lib-copy]").forEach(b=>b.addEventListener("click", ()=>{
+      const id = b.getAttribute("data-lib-copy");
+      const item = items.find(x=>x.id===id);
+      copyText(item ? item.final_reply : "");
+    }));
+
+    root.querySelectorAll("[data-lib-del]").forEach(b=>b.addEventListener("click", ()=>{
+      const id = b.getAttribute("data-lib-del");
+      const next = items.filter(x=>x.id!==id);
+      saveJSON(KEY_LIB, next);
+      renderLib();
+      showToast("Excluído ✅");
+    }));
+
+    root.querySelectorAll("[data-lib-edit]").forEach(b=>b.addEventListener("click", ()=>{
+      const id = b.getAttribute("data-lib-edit");
+      const item = items.find(x=>x.id===id);
+      if(!item) return;
+      const edited = prompt("Edite a resposta (ao salvar, fica como aprovada):", item.final_reply);
+      if(edited === null) return;
+      item.final_reply = edited;
+      item.edited_by_human = true;
+      item.updated_at = nowISO();
+      saveJSON(KEY_LIB, items);
+      renderLib();
+      showToast("Atualizado ✅");
+    }));
+  }
+
+  document.getElementById("libSearch").addEventListener("input", renderLib);
+
+  document.getElementById("btnLibWipe").addEventListener("click", ()=>{
+    if(confirm("Tem certeza que quer apagar TODA a biblioteca de respostas aprovadas?")){
+      saveJSON(KEY_LIB, []);
+      renderLib();
+      showToast("Apagado ✅");
+    }
+  });
+
+  document.getElementById("btnLibExport").addEventListener("click", ()=>{
+    const items = loadJSON(KEY_LIB, []);
+    const blob = new Blob([JSON.stringify(items, null, 2)], {type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "aprovadas_v4.json";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 1000);
+  });
+
+  document.getElementById("libImport").addEventListener("change", async (e)=>{
+    const f = e.target.files && e.target.files[0];
+    if(!f) return;
+    const txt = await f.text();
+    try{
+      const items = JSON.parse(txt);
+      if(!Array.isArray(items)) throw new Error("JSON inválido (esperava array)");
+      saveJSON(KEY_LIB, items);
+      renderLib();
+      showToast("Biblioteca importada ✅");
+    }catch(err){
+      alert("Falha ao importar: " + err);
+    }finally{
+      e.target.value = "";
+    }
+  });
+
+  // ========= IA call (optional backend) =========
+  function renderAI(payload){
+    const el = document.getElementById("aiResult");
+    if(!payload || payload.ok !== true){
+      const msg = (payload && (payload.error || payload.detail)) ? (payload.error || payload.detail) : "IA OFF (ou erro).";
+      el.innerHTML = `<div class="dangerBox"><b>Ops:</b> ${msg}</div>`;
+      return;
+    }
+    const { suggested_command, reply, variations, notes } = payload;
+
+    el.innerHTML = `
+      <div class="okBox">
+        <div class="row" style="justify-content:space-between">
+          <div><b>Comando sugerido:</b> <span class="kbd">${(suggested_command||"—")}</span></div>
+          <div class="row">
+            <button class="btn primary" data-ai-approve="main">Aprovar</button>
+            <button class="btn warn" data-ai-editapprove="main">Editar e aprovar</button>
+            <button class="btn" data-ai-copy="main">Copiar</button>
+          </div>
+        </div>
+
+        <pre data-ai="main" style="margin-top:10px">${(reply||"").replace(/</g,"&lt;").replace(/>/g,"&gt;")}</pre>
+
+        <div class="row" style="margin-top:10px">
+          <span class="pill"><span class="kbd">Variações</span></span>
+          <button class="btn primary" data-ai-approve="v1">Aprovar v1</button>
+          <button class="btn warn" data-ai-editapprove="v1">Editar+aprovar v1</button>
+          <button class="btn" data-ai-copy="v1">Copiar v1</button>
+          <button class="btn primary" data-ai-approve="v2">Aprovar v2</button>
+          <button class="btn warn" data-ai-editapprove="v2">Editar+aprovar v2</button>
+          <button class="btn" data-ai-copy="v2">Copiar v2</button>
+        </div>
+
+        <pre data-ai="v1" style="margin-top:10px">${(variations && variations[0] ? variations[0] : "").replace(/</g,"&lt;").replace(/>/g,"&gt;")}</pre>
+        <pre data-ai="v2" style="margin-top:10px">${(variations && variations[1] ? variations[1] : "").replace(/</g,"&lt;").replace(/>/g,"&gt;")}</pre>
+
+        ${notes ? `<div class="hint" style="margin-top:10px"><b>Notas:</b> ${notes}</div>` : ""}
+      </div>
+    `;
+
+    // wire buttons
+    const rawClient = document.getElementById("aiClientMsg").value.trim();
+    const privacyOn = document.getElementById("privacyMode").checked;
+    const sentClient = privacyOn ? redactText(rawClient) : rawClient;
+
+    function getText(key){
+      const pre = el.querySelector(`pre[data-ai="${key}"]`);
+      return pre ? pre.innerText : "";
+    }
+
+    el.querySelectorAll("[data-ai-copy]").forEach(b=>b.addEventListener("click", ()=>{
+      copyText(getText(b.getAttribute("data-ai-copy")));
+    }));
+
+    function approve(key, edited=false, editedText=null){
+      const final = editedText ?? getText(key);
+      if(!final.trim()){ showToast("Vazio 😅"); return; }
+      const lib = loadJSON(KEY_LIB, []);
+      lib.unshift({
+        id: crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2),
+        created_at: nowISO(),
+        profile: currentProfile(),
+        command: (suggested_command||"").trim(),
+        client_message: sentClient,
+        final_reply: final,
+        edited_by_human: edited,
+        notes: notes || ""
+      });
+      saveJSON(KEY_LIB, lib);
+      renderLib();
+      showToast("Aprovado ✅");
+      // bonus: muda pra aba aprovadas
+      setTab("tab-lib");
+    }
+
+    el.querySelectorAll("[data-ai-approve]").forEach(b=>b.addEventListener("click", ()=> approve(b.getAttribute("data-ai-approve")) ));
+    el.querySelectorAll("[data-ai-editapprove]").forEach(b=>b.addEventListener("click", ()=>{
+      const key = b.getAttribute("data-ai-editapprove");
+      const current = getText(key);
+      const edited = prompt("Edite a resposta (ao salvar, já aprova):", current);
+      if(edited === null) return;
+      approve(key, true, edited);
+    }));
+  }
+
+  async function aiSuggest(){
+    const raw = document.getElementById("aiClientMsg").value.trim();
+    if(!raw){ renderAI({ok:false, error:"Cole a mensagem do cliente primeiro 🙂"}); return; }
+
+    const baseUrl = (document.getElementById("apiBase").value || "").trim().replace(/\/+$/,"");
+    if(!baseUrl){
+      renderAI({ok:false, error:"IA OFF: preencha a URL do backend (apiBase) ali em cima."});
+      return;
+    }
+
+    const privacyOn = document.getElementById("privacyMode").checked;
+    const msg = privacyOn ? redactText(raw) : raw;
+
+    renderAI({ok:false, error:"Chamando IA..."});
+
+    try{
+      const url = `${baseUrl}/ai/suggest`;
+      const res = await fetch(url, {
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify({
+          client_message: msg,
+          profile: currentProfile(),
+          default_vant: document.getElementById("defaultVant").value,
+          default_rod: document.getElementById("defaultRod").value,
+          templates: collectTemplates(),
+          privacy_mode: privacyOn
+        })
+      });
+      const data = await res.json();
+      renderAI(data);
+    }catch(e){
+      renderAI({ok:false, error:"Não conectei no backend. Confere se ele está rodando e se a URL está certa."});
+    }
+  }
+
+  document.getElementById("btnAISuggest").addEventListener("click", aiSuggest);
+  document.getElementById("btnAIClear").addEventListener("click", ()=>{
+    document.getElementById("aiClientMsg").value="";
+    document.getElementById("aiResult").innerHTML="";
+    document.getElementById("redactionPreview").innerHTML="";
+  });
+
+  // ========= init =========
+  renderScrap();
+  renderLib();
+</script>
+</body>
+</html>
