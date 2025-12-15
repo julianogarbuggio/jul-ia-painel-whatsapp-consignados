@@ -1,54 +1,42 @@
-# 🤖 Jul.IA | Painel WhatsApp – Consignados (Frontend + Backend)
+# 🤖 Jul.IA | Painel WhatsApp – Consignados (Frontend)
 
-Este repositório contém:
-
-- 🧩 **Frontend (HTML)**: painel local para copiar/colar respostas, scrapbook e aprovações.
-- 🧠 **Backend (FastAPI)**: “gateway + cérebro” (rota `/ai/suggest` + webhook `/webhook`).
-
-> **Fase atual:** roda localmente.  
-> **Próxima fase:** deploy no Railway para a IA ficar online.
+Ferramenta **interna** do escritório **Juliano Garbuggio – Advocacia & Consultoria** para otimizar o atendimento via WhatsApp, com fluxos estruturados, textos padronizados e apoio de inteligência artificial (em fase futura).
 
 ---
 
-## ▶️ Rodar o Frontend
-Abra no navegador:
-- `frontend/Painel_WhatsApp_v4.html`
-
-Opcional (servidor local):
-```powershell
-cd .\frontend
-python -m http.server 5500
-```
+## 📌 Objetivo
+Centralizar e agilizar o atendimento inicial de clientes de **empréstimos consignados e contratos bancários**, garantindo:
+- Padronização das respostas  
+- Clareza na comunicação  
+- Ganho de produtividade  
+- Conformidade ética e organizacional  
 
 ---
 
-## 🧠 Rodar o Backend (local)
-```powershell
-cd .\backend
-python -m venv .venv
-.\.venv\Scripts\activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload --host 127.0.0.1 --port 8020
-```
+## ⚙️ Funcionalidades
+- 📋 **Fluxos e mensagens prontas**  
+  Comandos rápidos como `/m1`, `/m4`, `/proposta`, entre outros.
 
-Teste:
-- `http://127.0.0.1:8020/health`
+- 🧠 **Scrapbook (biblioteca de textos livres)**  
+  Avisos de férias, horários de atendimento, políticas internas, links úteis, etc.
 
-No painel, coloque o **apiBase** como:
-- `http://127.0.0.1:8020`
+- ✅ **Biblioteca de respostas aprovadas**  
+  Memória local no navegador para reutilização de respostas validadas.
 
----
+- 🔒 **Modo privacidade**  
+  Mascaramento de dados sensíveis antes do uso de IA (quando houver backend).
 
-## 🌐 Deploy no Railway (resumo)
-1. Suba este repo no GitHub
-2. No Railway: **New Project → Deploy from GitHub**
-3. Defina variáveis (Settings → Variables):
-   - `META_VERIFY_TOKEN`
-   - `WHATSAPP_TOKEN`
-   - (futuro) `OPENAI_API_KEY`
-4. O Railway usa o `Procfile` para iniciar o servidor.
+- 📤 **Exportação do painel**  
+  Geração de uma nova versão do HTML com todas as alterações aplicadas.
 
 ---
 
-© 2025 Juliano Garbuggio – Advocacia & Consultoria  
-Powered by Jul.IA — Inteligência Jurídica Automatizada
+## 🚧 Status do Projeto
+**Versão atual:** HTML offline (Frontend only)
+
+> ℹ️ A funcionalidade **“IA sugerir”** depende da implantação futura de um backend em **FastAPI**, com integração à API de IA e banco de dados.
+
+---
+
+## ▶️ Como usar (modo simples)
+1. Abra o arquivo HTML no navegador:
